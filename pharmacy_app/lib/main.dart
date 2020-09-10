@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:asuka/asuka.dart' as asuka;
+import 'dart:async';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(PharmacyApp());
 }
 
@@ -9,6 +14,7 @@ class PharmacyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: asuka.builder,
       title: 'Prescriptions',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -24,6 +30,17 @@ class PrescriptionsPage extends StatefulWidget {
 }
 
 class _PrescriptionsPageState extends State<PrescriptionsPage> {
+  File sampleImage;
+  final _picker = ImagePicker();
+
+  Future getImageGallery() async {
+    var tempImage = await _picker.getImage(source: ImageSource.gallery);
+
+    setState(() {
+      sampleImage = File(tempImage.path);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final GlobalKey<ScaffoldState> _scaffoldKey =
@@ -34,6 +51,11 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
         title: Text("Prescriptions"),
         centerTitle: true,
       ),
+      body: Center(
+        child: sampleImage == null
+            ? Text('Select an image')
+            : uploadImage(),
+      ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -43,7 +65,7 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
             child: Icon(Icons.add_a_photo),
             heroTag: "AddImageTag",
             onPressed: () {
-              // ToDo: Open Image Gallery and Pick Photo
+              getImageGallery();
             },
           ),
           SizedBox(
@@ -55,6 +77,25 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
             heroTag: "UploadedImagesTag",
             onPressed: () {
               //ToDo: Go to second page to view images on Firebase Storage
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget uploadImage(){
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Image.file(sampleImage, height: 400.0, width: 400.0),
+          RaisedButton(
+            elevation: 7.0,
+            child: Text('Upload'),
+            textColor: Colors.white,
+            color: Colors.blue,
+            onPressed: () async {
+              //Todo Upload Image to Firebase
             },
           ),
         ],
