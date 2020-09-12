@@ -3,9 +3,12 @@ import 'package:asuka/asuka.dart' as asuka;
 import 'dart:async';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(PharmacyApp());
 }
 
@@ -95,7 +98,22 @@ class _PrescriptionsPageState extends State<PrescriptionsPage> {
             textColor: Colors.white,
             color: Colors.blue,
             onPressed: () async {
-              //Todo Upload Image to Firebase
+              String _imageName = DateTime.now().toString();
+
+              final StorageReference firebaseStorgeRef =
+                  FirebaseStorage().ref().child('Images/$_imageName');
+
+              final StorageUploadTask task =
+                  firebaseStorgeRef.putFile(sampleImage);
+
+              await task.onComplete.catchError((e) {
+                print(e);
+              });
+
+              asuka.showSnackBar(SnackBar(
+                content: Text('Upload Complete'),
+                backgroundColor: Colors.blue,
+              ));
             },
           ),
         ],
